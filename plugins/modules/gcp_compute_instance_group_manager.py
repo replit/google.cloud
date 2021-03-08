@@ -401,6 +401,7 @@ def main():
             target_pools=dict(type='list', elements='dict'),
             target_size=dict(type='int'),
             zone=dict(required=True, type='str'),
+            update_policy=dict(required=True, type='dict'),
         )
     )
 
@@ -464,6 +465,7 @@ def resource_to_request(module):
         u'namedPorts': InstanceGroupManagerNamedportsArray(module.params.get('named_ports', []), module).to_request(),
         u'targetPools': replace_resource_dict(module.params.get('target_pools', []), 'selfLink'),
         u'targetSize': module.params.get('target_size'),
+        u'updatePolicy': module.params.get('update_policy'),
     }
     return_vals = {}
     for k, v in request.items():
