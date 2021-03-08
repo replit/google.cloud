@@ -400,6 +400,7 @@ def main():
             named_ports=dict(type='list', elements='dict', options=dict(name=dict(type='str'), port=dict(type='int'))),
             target_pools=dict(type='list', elements='dict'),
             target_size=dict(type='int'),
+            auto_healing_policies=dict(type='list', elements='dict', options=dict(health_check=dict(type='str'), initial_delay_sec=dict(type='int'))),
             zone=dict(required=True, type='str'),
             update_policy=dict(required=True, type='dict'),
         )
@@ -465,6 +466,7 @@ def resource_to_request(module):
         u'namedPorts': InstanceGroupManagerNamedportsArray(module.params.get('named_ports', []), module).to_request(),
         u'targetPools': replace_resource_dict(module.params.get('target_pools', []), 'selfLink'),
         u'targetSize': module.params.get('target_size'),
+        u'autoHealingPolicies': InstanceGroupManagerAutohealingpoliciesArray(module.params.get('auto_healing_policies', []), module).to_request(),
         u'updatePolicy': module.params.get('update_policy'),
     }
     return_vals = {}
@@ -543,6 +545,7 @@ def response_to_hash(module, response):
         u'region': response.get(u'region'),
         u'targetPools': response.get(u'targetPools'),
         u'targetSize': response.get(u'targetSize'),
+        u'autoHealingPolicies': InstanceGroupManagerAutohealingpoliciesArray(response.get(u'autoHealingPolicies', []), module).from_response(),
     }
 
 
@@ -630,6 +633,33 @@ class InstanceGroupManagerNamedportsArray(object):
 
     def _response_from_item(self, item):
         return remove_nones_from_dict({u'name': item.get(u'name'), u'port': item.get(u'port')})
+
+
+class InstanceGroupManagerAutohealingpoliciesArray(object):
+    def __init__(self, request, module):
+        self.module = module
+        if request:
+            self.request = request
+        else:
+            self.request = []
+
+    def to_request(self):
+        items = []
+        for item in self.request:
+            items.append(self._request_for_item(item))
+        return items
+
+    def from_response(self):
+        items = []
+        for item in self.request:
+            items.append(self._response_from_item(item))
+        return items
+
+    def _request_for_item(self, item):
+        return remove_nones_from_dict({u'healthCheck': item.get('health_check'), u'initialDelaySec': item.get('initial_delay_sec')})
+
+    def _response_from_item(self, item):
+        return remove_nones_from_dict({u'healthCheck': item.get(u'healthCheck'), u'initialDelaySec': item.get(u'initialDelaySec')})
 
 
 if __name__ == '__main__':
