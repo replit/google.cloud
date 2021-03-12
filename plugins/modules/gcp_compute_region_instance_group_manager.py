@@ -431,21 +431,7 @@ def main():
             target_size=dict(type='int'),
             auto_healing_policies=dict(type='list', elements='dict', options=dict(health_check=dict(type='str'), initial_delay_sec=dict(type='int'))),
             region=dict(required=True, type='str'),
-            distributionPolicy={
-                'type': 'dict',
-                'elements': 'dict',
-                'options': {
-                    'zones': {
-                        'type': 'list',
-                        'elements': 'dict',
-                        'options': {
-                            'zone': {
-                                'type': 'str'
-                            }
-                        }
-                    }
-                }
-            }
+            distributionPolicy=dict(required=False, type='dict'),
         )
     )
 
