@@ -477,7 +477,7 @@ def update(module, link, kind, fetch):
     request = resource_to_request(module)
     request.update({'fingerprint': fetch.get('fingerprint')})
 
-    return wait_for_operation(module, auth.put(link, request))
+    return wait_for_operation(module, auth.patch(link, request))
 
 
 def delete(module, link, kind):
