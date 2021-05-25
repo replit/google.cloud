@@ -432,6 +432,7 @@ def main():
             auto_healing_policies=dict(type='list', elements='dict', options=dict(health_check=dict(type='str'), initial_delay_sec=dict(type='int'))),
             region=dict(required=True, type='str'),
             distributionPolicy=dict(required=False, type='dict'),
+            update_policy=dict(required=False, type='dict'),
         )
     )
 
@@ -497,6 +498,7 @@ def resource_to_request(module):
         u'targetSize': module.params.get('target_size'),
         u'autoHealingPolicies': RegionInstanceGroupManagerAutohealingpoliciesArray(module.params.get('auto_healing_policies', []), module).to_request(),
         u'distributionPolicy': module.params.get('distributionPolicy'),
+        u'updatePolicy': module.params.get('update_policy'),
     }
     return_vals = {}
     for k, v in request.items():
