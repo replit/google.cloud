@@ -93,6 +93,12 @@ options:
     - This should not be set unless you know what you're doing.
     - This only alters the User Agent string for any API requests.
     type: str
+  timeout:
+    description:
+    - Specifies the amount of time in seconds to wait for the operation to complete.
+    default: 60
+    required: false
+    type: int
 """
 
 EXAMPLES = """
@@ -181,6 +187,7 @@ def main():
             src=dict(type="path"),
             dest=dict(type="path"),
             bucket=dict(type="str"),
+            timeout=dict(type="int"),
         )
     )
 
@@ -202,6 +209,9 @@ def main():
 
     remote_file_exists = Blob(remote_file_path(module), bucket).exists()
     local_file_exists = os.path.isfile(local_file_path(module))
+
+    if not module.params["timeout"]:
+        module.params["timeout"] = 60
 
     # Check if files exist.
     results = {}
@@ -241,7 +251,7 @@ def download_file(module, client, name, dest):
         bucket = client.get_bucket(module.params['bucket'])
         blob = Blob(name, bucket)
         with open(dest, "wb") as file_obj:
-            blob.download_to_file(file_obj)
+            blob.download_to_file(file_obj, timeout=module.params['timeout'])
         return blob_to_dict(blob)
     except google.cloud.exceptions.NotFound as e:
         module.fail_json(msg=str(e))
@@ -251,8 +261,8 @@ def upload_file(module, client, src, dest):
     try:
         bucket = client.get_bucket(module.params['bucket'])
         blob = Blob(dest, bucket)
-        with open(src, "r") as file_obj:
-            blob.upload_from_file(file_obj)
+        with open(src, "rb") as file_obj:
+            blob.upload_from_file(file_obj, timeout=module.params['timeout'])
         return blob_to_dict(blob)
     except google.cloud.exceptions.GoogleCloudError as e:
         module.fail_json(msg=str(e))
@@ -262,7 +272,7 @@ def delete_file(module, client, name):
     try:
         bucket = client.get_bucket(module.params['bucket'])
         blob = Blob(name, bucket)
-        blob.delete()
+        blob.delete(timeout=module.params['timeout'])
         return {}
     except google.cloud.exceptions.NotFound as e:
         module.fail_json(msg=str(e))
