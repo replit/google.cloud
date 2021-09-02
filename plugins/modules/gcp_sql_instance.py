@@ -641,6 +641,13 @@ settings:
           - Whether the instance should be assigned an IP address or not.
           returned: success
           type: bool
+        privateNetwork:
+          description:
+          - The resource link for the VPC network from which the Cloud SQL instance is
+            accessible for private IP. For example, /projects/myProject/global/networks/default.
+            This setting can be updated, but it cannot be removed after it is set.
+          returned: success
+          type: string
         authorizedNetworks:
           description:
           - The list of external networks that are allowed to connect to the instance
@@ -860,6 +867,7 @@ def main():
                         type='dict',
                         options=dict(
                             ipv4_enabled=dict(type='bool'),
+                            private_network=dict(type='str'),
                             authorized_networks=dict(
                                 type='list', elements='dict', options=dict(expiration_time=dict(type='str'), name=dict(type='str'), value=dict(type='str'))
                             ),
@@ -1251,6 +1259,7 @@ class InstanceIpconfiguration(object):
         return remove_nones_from_dict(
             {
                 u'ipv4Enabled': self.request.get('ipv4_enabled'),
+                u'privateNetwork': self.request.get('private_network'),
                 u'authorizedNetworks': InstanceAuthorizednetworksArray(self.request.get('authorized_networks', []), self.module).to_request(),
                 u'requireSsl': self.request.get('require_ssl'),
             }
@@ -1260,6 +1269,7 @@ class InstanceIpconfiguration(object):
         return remove_nones_from_dict(
             {
                 u'ipv4Enabled': self.request.get(u'ipv4Enabled'),
+                u'privateNetwork': self.request.get(u'privateNetwork'),
                 u'authorizedNetworks': InstanceAuthorizednetworksArray(self.request.get(u'authorizedNetworks', []), self.module).from_response(),
                 u'requireSsl': self.request.get(u'requireSsl'),
             }
