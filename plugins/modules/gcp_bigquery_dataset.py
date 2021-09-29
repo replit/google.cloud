@@ -531,10 +531,14 @@ def main():
                 update(module, self_link(module), kind)
                 fetch = fetch_resource(module, self_link(module), kind)
                 changed = True
+            module.exit_json(changed=true, module=module, different=is_different(module, fetch), fetch=fetch, msg="State was present and ansible should have updated the access?")
+          module.fail_json(module=module, different=is_different(module, fetch), fetch=fetch, msg="State was present, but both object were the same for some reason")
         else:
             delete(module, self_link(module), kind)
             fetch = {}
             changed = True
+
+      module.fail_json(fetch=fetch, msg="State was not present, something else happened")
     else:
         if state == 'present':
             fetch = create(module, collection(module), kind)
