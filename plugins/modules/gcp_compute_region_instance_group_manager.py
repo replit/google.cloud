@@ -431,6 +431,8 @@ def main():
             target_size=dict(type='int'),
             auto_healing_policies=dict(type='list', elements='dict', options=dict(health_check=dict(type='str'), initial_delay_sec=dict(type='int'))),
             region=dict(required=True, type='str'),
+            distributionPolicy=dict(required=False, type='dict'),
+            update_policy=dict(required=False, type='dict'),
         )
     )
 
@@ -446,7 +448,7 @@ def main():
     if fetch:
         if state == 'present':
             if is_different(module, fetch):
-                update(module, self_link(module), kind)
+                update(module, self_link(module), kind, fetch)
                 fetch = fetch_resource(module, self_link(module), kind)
                 changed = True
         else:
@@ -470,9 +472,13 @@ def create(module, link, kind):
     return wait_for_operation(module, auth.post(link, resource_to_request(module)))
 
 
-def update(module, link, kind):
+def update(module, link, kind, fetch):
     auth = GcpSession(module, 'compute')
-    return wait_for_operation(module, auth.put(link, resource_to_request(module)))
+
+    request = resource_to_request(module)
+    request.update({'fingerprint': fetch.get('fingerprint')})
+
+    return wait_for_operation(module, auth.patch(link, request))
 
 
 def delete(module, link, kind):
@@ -491,6 +497,8 @@ def resource_to_request(module):
         u'targetPools': replace_resource_dict(module.params.get('target_pools', []), 'selfLink'),
         u'targetSize': module.params.get('target_size'),
         u'autoHealingPolicies': RegionInstanceGroupManagerAutohealingpoliciesArray(module.params.get('auto_healing_policies', []), module).to_request(),
+        u'distributionPolicy': module.params.get('distributionPolicy'),
+        u'updatePolicy': module.params.get('update_policy'),
     }
     return_vals = {}
     for k, v in request.items():
@@ -568,6 +576,7 @@ def response_to_hash(module, response):
         u'targetPools': response.get(u'targetPools'),
         u'targetSize': response.get(u'targetSize'),
         u'autoHealingPolicies': RegionInstanceGroupManagerAutohealingpoliciesArray(response.get(u'autoHealingPolicies', []), module).from_response(),
+        u'distributionPolicy': response.get(u'distributionPolicy'),
     }
 
 

@@ -1458,7 +1458,7 @@ def main():
     if fetch:
         if state == 'present':
             if is_different(module, fetch):
-                update(module, self_link(module), kind)
+                update(module, self_link(module), kind, fetch)
                 fetch = fetch_resource(module, self_link(module), kind)
                 changed = True
         else:
@@ -1482,9 +1482,13 @@ def create(module, link, kind):
     return wait_for_operation(module, auth.post(link, resource_to_request(module)))
 
 
-def update(module, link, kind):
+def update(module, link, kind, fetch):
     auth = GcpSession(module, 'compute')
-    return wait_for_operation(module, auth.put(link, resource_to_request(module)))
+
+    request = resource_to_request(module)
+    request.update({'fingerprint': fetch.get('fingerprint')})
+
+    return wait_for_operation(module, auth.put(link, request))
 
 
 def delete(module, link, kind):

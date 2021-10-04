@@ -224,10 +224,12 @@ def main():
     module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
-            certificate=dict(required=True, type='str'),
+            certificate=dict(type='str'),
             description=dict(type='str'),
             name=dict(type='str'),
-            private_key=dict(required=True, type='str', no_log=True),
+            private_key=dict(type='str', no_log=True),
+            type=dict(type='str', choices=['SELF_MANAGED', 'MANAGED'], default='SELF_MANAGED'),
+            domains=dict(type='list', default=[]),
         )
     )
 
@@ -284,6 +286,10 @@ def resource_to_request(module):
         u'description': module.params.get('description'),
         u'name': module.params.get('name'),
         u'privateKey': module.params.get('private_key'),
+        u'managed': {
+            u'domains': module.params.get('domains'),
+        },
+        u'type': module.params.get('type'),
     }
     return_vals = {}
     for k, v in request.items():
@@ -355,6 +361,8 @@ def response_to_hash(module, response):
         u'id': response.get(u'id'),
         u'name': response.get(u'name'),
         u'privateKey': module.params.get('private_key'),
+        u'domains': response.get(u'managed')['domains'],
+        u'type': response.get(u'type'),
     }
 
 
