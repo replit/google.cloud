@@ -102,14 +102,14 @@ class GcpSession(object):
         kwargs.update({'data': file_contents, 'headers': headers})
         return self.full_post(url, **kwargs)
 
-    def delete(self, url, body=None):
+    def delete(self, url, body=None, **kwargs):
         """
         This method should be avoided in favor of full_delete
         """
         kwargs = {'json': body}
         return self.full_delete(url, **kwargs)
 
-    def put(self, url, body=None):
+    def put(self, url, body=None, **kwargs):
         """
         This method should be avoided in favor of full_put
         """
