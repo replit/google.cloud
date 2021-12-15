@@ -214,7 +214,7 @@ import base64
 def main():
     """Main function"""
 
-    import pdb; pdb.set_trace()
+    import epdb; epdb.serve()
     module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
