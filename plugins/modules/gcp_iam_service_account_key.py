@@ -249,6 +249,7 @@ def main():
 
 
 def create(module):
+    import pdb; pdb.set_trace()
     auth = GcpSession(module, 'iam')
     json_content = return_if_object(module, auth.post(self_link(module), resource_to_request(module)))
     with open(module.params['path'], 'w') as f:
