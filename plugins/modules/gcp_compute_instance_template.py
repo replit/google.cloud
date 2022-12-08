@@ -1053,12 +1053,28 @@ def main():
                                     network_tier=dict(type='str'),
                                 ),
                             ),
+                            ipv6_access_configs=dict(
+                                type='list',
+                                elements='dict',
+                                options=dict(
+                                    name=dict(required=True, type='str'),
+                                    nat_ip=dict(type='dict'),
+                                    external_ipv6=dict(type='str'),
+                                    external_ipv6_prefix_length=dict(type='str'),
+                                    type=dict(required=True, type='str'),
+                                    set_public_ptr=dict(type='bool'),
+                                    public_ptr_domain_name=dict(type='str'),
+                                    network_tier=dict(type='str'),
+                                ),
+                            ),
                             alias_ip_ranges=dict(
                                 type='list', elements='dict', options=dict(ip_cidr_range=dict(type='str'), subnetwork_range_name=dict(type='str'))
                             ),
                             network=dict(type='dict'),
                             network_ip=dict(type='str'),
                             subnetwork=dict(type='dict'),
+                            stack_type=dict(type='str'),
+                            ipv6_access_type=dict(type='str'),
                         ),
                     ),
                     scheduling=dict(
@@ -1514,10 +1530,13 @@ class InstanceTemplateNetworkinterfacesArray(object):
         return remove_nones_from_dict(
             {
                 u'accessConfigs': InstanceTemplateAccessconfigsArray(item.get('access_configs', []), self.module).to_request(),
+                u'ipv6AccessConfigs': InstanceTemplateIpv6accessconfigsArray(item.get('ipv6_access_configs', []), self.module).to_request(),
                 u'aliasIpRanges': InstanceTemplateAliasiprangesArray(item.get('alias_ip_ranges', []), self.module).to_request(),
                 u'network': replace_resource_dict(item.get(u'network', {}), 'selfLink'),
                 u'networkIP': item.get('network_ip'),
                 u'subnetwork': replace_resource_dict(item.get(u'subnetwork', {}), 'selfLink'),
+                u'stackType': item.get('stack_type'),
+                u'ipv6AccessType': item.get('ipv6_access_type'),
             }
         )
 
@@ -1525,15 +1544,63 @@ class InstanceTemplateNetworkinterfacesArray(object):
         return remove_nones_from_dict(
             {
                 u'accessConfigs': InstanceTemplateAccessconfigsArray(item.get(u'accessConfigs', []), self.module).from_response(),
+                u'ipv6AccessConfigs': InstanceTemplateIpv6accessconfigsArray(item.get(u'ipv6AccessConfigs', []), self.module).from_response(),
                 u'aliasIpRanges': InstanceTemplateAliasiprangesArray(item.get(u'aliasIpRanges', []), self.module).from_response(),
                 u'network': item.get(u'network'),
                 u'networkIP': item.get(u'networkIP'),
                 u'subnetwork': item.get(u'subnetwork'),
+                u'stackType': item.get(u'stackType'),
+                u'ipv6AccessType': item.get(u'ipv6AccessType'),
             }
         )
 
 
 class InstanceTemplateAccessconfigsArray(object):
+    def __init__(self, request, module):
+        self.module = module
+        if request:
+            self.request = request
+        else:
+            self.request = []
+
+    def to_request(self):
+        items = []
+        for item in self.request:
+            items.append(self._request_for_item(item))
+        return items
+
+    def from_response(self):
+        items = []
+        for item in self.request:
+            items.append(self._response_from_item(item))
+        return items
+
+    def _request_for_item(self, item):
+        return remove_nones_from_dict(
+            {
+                u'name': item.get('name'),
+                u'natIP': replace_resource_dict(item.get(u'nat_ip', {}), 'address'),
+                u'type': item.get('type'),
+                u'setPublicPtr': item.get('set_public_ptr'),
+                u'publicPtrDomainName': item.get('public_ptr_domain_name'),
+                u'networkTier': item.get('network_tier'),
+            }
+        )
+
+    def _response_from_item(self, item):
+        return remove_nones_from_dict(
+            {
+                u'name': item.get(u'name'),
+                u'natIP': item.get(u'natIP'),
+                u'type': item.get(u'type'),
+                u'setPublicPtr': item.get(u'setPublicPtr'),
+                u'publicPtrDomainName': item.get(u'publicPtrDomainName'),
+                u'networkTier': item.get(u'networkTier'),
+            }
+        )
+
+
+class InstanceTemplateIpv6accessconfigsArray(object):
     def __init__(self, request, module):
         self.module = module
         if request:
